@@ -166,3 +166,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     create_captions_video(args.input_video, args.output_video, args.api_key)
+
+# print("ni hao, zao jiu hao le")
