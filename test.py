@@ -166,3 +166,5 @@ if video_file:
             # Cleanup
             os.unlink(video_path)
             os.unlink(audio_path)
+
+            print("hello from someone u don't know lol")
