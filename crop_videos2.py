@@ -8,6 +8,8 @@ from pathlib import Path
 import argparse
 
 
+# hellow in new advancement 
+
 class SmartVerticalCropper:
     def __init__(self, smoothing_factor=0.2, min_face_size=0.1):
         """
