@@ -9,6 +9,7 @@ import argparse
 
 
 # hellow in new advancement 
+print("Hi, supposed to crop better, hope not to ended up ruininng it lol")
 
 class SmartVerticalCropper:
     def __init__(self, smoothing_factor=0.2, min_face_size=0.1):
