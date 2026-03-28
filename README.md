@@ -1,3 +1,41 @@
+# YouTube Shorts Uploader Integration
+
+## How to Set Up YouTube API Credentials
+
+1. Go to the [Google Cloud Console](https://console.developers.google.com/).
+2. Create a new project (or select an existing one).
+3. Go to **APIs & Services > Library** and enable **YouTube Data API v3**.
+4. Go to **APIs & Services > Credentials**.
+5. Click **Create Credentials > OAuth client ID**.
+6. Choose **Desktop app** and download the `client_secrets.json` file.
+7. Place `client_secrets.json` in your project root directory.
+
+The first time you upload, a browser window will open for authentication. A `token.pickle` file will be created for future use.
+
+## Install Requirements
+
+```bash
+pip install -r requirements.txt
+```
+
+## Usage
+
+- Use the provided upload function in `youtube_upload.py` to upload your processed video as a YouTube Short.
+- Example:
+
+```python
+from youtube_upload import upload_video
+
+video_id = upload_video(
+    file_path="your_video.mp4",
+    title="My YouTube Short",
+    description="This is a test short! #Shorts",
+    tags=["Shorts", "Test"]
+)
+print(f"Uploaded video ID: {video_id}")
+```
+
+---
 # Convert Videos to Short Clips
 
 A Python application that automatically converts long videos into engaging vertical short clips with smart cropping and auto-generated captions.

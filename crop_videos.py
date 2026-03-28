@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 import argparse
 import tempfile
-from moviepy.editor import VideoFileClip
+import moviepy.editor as mpy
 from moviepy.video.io.ffmpeg_tools import ffmpeg_merge_video_audio
 
 class SmartVerticalCropper:
@@ -314,7 +314,7 @@ class SmartVerticalCropper:
         try:
             # Extract audio from original video
             temp_audio_path = tempfile.mktemp(suffix='.mp3')
-            original_clip = VideoFileClip(input_path)
+            original_clip = mpy.VideoFileClip(input_path)
             original_clip.audio.write_audiofile(temp_audio_path, verbose=False, logger=None)
             original_clip.close()
             
