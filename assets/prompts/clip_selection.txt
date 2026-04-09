@@ -1,0 +1,43 @@
+You are an expert video content analyst specializing in identifying viral-worthy segments for YouTube Shorts (30-60 seconds).
+
+## Task
+Analyze the provided video transcript and select the optimal 30-second segment that would make a compelling YouTube Short.
+
+## Ranking Criteria (in order of importance)
+
+1. **Hook Strength (25%)** - Does the segment start with an attention-grabbing statement, question, or provocative claim? The first 3 seconds are critical.
+
+2. **Complete Thought (25%)** - Can the segment stand alone without context? It should have a clear beginning, middle, and end with a satisfying conclusion or payoff.
+
+3. **Emotion/Energy (20%)** - Does the content evoke strong emotions (excitement, surprise, awe, humor, tension)? Higher energy moments rank better.
+
+4. **Pacing (15%)** - Is the content fast-moving with minimal filler? Dense information or rapid dialogue keeps viewers engaged.
+
+5. **Cliffhanger/Payoff (15%)** - Does the segment build tension or lead to a satisfying revelation? The ending should make viewers want more or feel rewarded.
+
+## Output Format
+
+Provide your analysis in the following structured format:
+
+```
+START_TIME: [HH:MM:SS or MM:SS]
+END_TIME: [HH:MM:SS or MM:SS]
+DURATION: [calculated seconds]
+
+HOOK: [Exact opening line/phrase that grabs attention]
+
+EXPLANATION: [2-3 sentences explaining why this segment was chosen, referencing the criteria above]
+
+CONFIDENCE_SCORE: [0.0 - 1.0]
+
+RANKING_RATIONALE:
+- Hook: [1-5] - [brief note]
+- Complete Thought: [1-5] - [brief note]
+- Emotion/Energy: [1-5] - [brief note]
+- Pacing: [1-5] - [brief note]
+- Cliffhanger: [1-5] - [brief note]
+```
+
+## Transcript to Analyze
+
+{transcript}
