@@ -4,10 +4,15 @@ A Python application that automatically converts long videos into engaging verti
 
 ## Features
 
+- **Multi-Clip Generation**: Generate 1-3 clips from a single video simultaneously
+- **AI-Powered Clip Categorization**: GPT-4 identifies three types of clips:
+  - **Hook Focus**: Strongest opening grab - stops the scroll
+  - **Emotional Peak**: Laughter, surprise, awe, or powerful insights
+  - **Viral Moment**: Most shareable and quotable segment
 - **Smart Vertical Cropping**: Automatically detects and follows subjects (faces or motion) to create 9:16 vertical videos
-- **AI-Powered Clip Selection**: Uses GPT-4o to analyze transcripts and identify the most engaging 30-second segment with viral potential
 - **Auto-Captions**: Generates captions using OpenAI Whisper and burns them into the video
-- **Streamlit UI**: Easy-to-use web interface for uploading and processing videos
+- **Flexible Download Options**: Download individual clips or all clips as a ZIP file
+- **Streamlit UI**: Easy-to-use web interface with sidebar controls
 
 ## Installation
 
@@ -46,11 +51,24 @@ Open your browser to `http://localhost:8501`.
 
 ## How It Works
 
-1. **Upload**: User uploads a video file
-2. **Transcription**: Audio is extracted and transcribed using OpenAI Whisper
-3. **AI Analysis**: GPT-4o analyzes the transcript to find the most engaging 30-second segment
-4. **Smart Cropping**: The selected clip is cropped to vertical format using face detection and motion tracking
-5. **Caption Generation**: Captions are generated from the transcript and burned into the final video
+1. **Configure**: Select number of clips (1-3) and caption style in the sidebar
+2. **Upload**: User uploads a video file
+3. **Transcription**: Audio is extracted and transcribed using OpenAI Whisper
+4. **AI Analysis**: GPT-4 analyzes the transcript to identify multiple clip segments:
+   - Hook Focus (strongest opening)
+   - Emotional Peak (most impactful moment)
+   - Viral Moment (most shareable content)
+5. **Smart Cropping**: Each clip is cropped to vertical format using face detection and motion tracking
+6. **Caption Generation**: Captions are generated and burned into each final video
+7. **Download**: Choose individual clips or download all as a ZIP
+
+## Usage
+
+1. Adjust clip count slider (1-3) and caption style in the sidebar
+2. Upload a video file (mp4, avi, mov)
+3. Click "Process Video" to generate clips
+4. View clips in tabs, compare side-by-side
+5. Download individual clips or all at once
 
 ## Requirements
 
@@ -62,3 +80,9 @@ Open your browser to `http://localhost:8501`.
 - OpenAI
 - python-dotenv
 - ImageMagick
+
+## Notes
+
+- Each clip is automatically validated to be 15-30 seconds
+- Overlapping clips are automatically deduplicated
+- If fewer valid clips are found than requested, available clips are still generated
