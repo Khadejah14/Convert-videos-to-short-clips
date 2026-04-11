@@ -1,0 +1,6 @@
+# Smooth Follow Profile
+# Higher smoothing = slower, more cinematic camera movements
+# Lower smoothing = faster, more responsive movements
+
+smoothing_factor: 0.2
+min_face_size: 0.1

@@ -15,6 +15,13 @@ openai.api_key = os.getenv("api")
 
 video_file = st.file_uploader("Upload Video", type=['mp4', 'avi', 'mov'])
 
+caption_style = st.selectbox(
+    "Caption Style",
+    options=["default", "minimal", "highlight"],
+    index=0,
+    help="default: Solid black background | minimal: Transparent, subtle | highlight: Bold, word emphasis"
+)
+
 if video_file:
     
     if st.button("Process Video"):
@@ -119,7 +126,7 @@ if video_file:
                             # Use the API key from st.secrets or environment if available, 
                             # otherwise it will try to load from .env inside the function, 
                             # but we can pass it explicitly since we have it here.
-                            captions_success = create_captions_video(cropped_path, captioned_path, api_key=openai.api_key)
+                            captions_success = create_captions_video(cropped_path, captioned_path, api_key=openai.api_key, style_preset=caption_style)
                             
                             if captions_success:
                                 st.subheader("Final Video (Vertical + Captions)")

@@ -1,10 +1,39 @@
 
 import os
+import json
 import tempfile
 import textwrap
 from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip, ColorClip
 import openai
 from dotenv import load_dotenv
+
+
+def load_caption_preset(preset_name):
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    preset_path = os.path.join(base_dir, "assets", "templates", "captions", f"{preset_name}.json")
+    
+    default_preset = {
+        "font": "Arial-Bold",
+        "font_size_ratio": 0.05,
+        "color": "white",
+        "bg_color": "black",
+        "stroke_width": 0,
+        "stroke_color": "black",
+        "position": {"x": "center", "y": 0.8},
+        "max_width_ratio": 0.8,
+        "animation_type": "static"
+    }
+    
+    if not os.path.exists(preset_path):
+        print(f"Warning: Preset '{preset_name}' not found. Using default.")
+        return default_preset
+    
+    try:
+        with open(preset_path, 'r') as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Error loading preset '{preset_name}': {e}. Using default.")
+        return default_preset
 
 # Load environment variables
 
@@ -31,7 +60,7 @@ if os.name == 'nt':
                     print(f"Failed to set ImageMagick binary: {e}")
 
 
-def create_captions_video(video_path, output_path, api_key=None):
+def create_captions_video(video_path, output_path, api_key=None, style_preset="default"):
     """
     Takes a video file, generates transcripts using OpenAI Whisper,
     and creates a new video with visually appealing captions burned in.
@@ -40,7 +69,11 @@ def create_captions_video(video_path, output_path, api_key=None):
         video_path (str): Path to the input video file.
         output_path (str): Path to save the output video with captions.
         api_key (str, optional): OpenAI API key. defaults to os.getenv("api").
+        style_preset (str): Name of the caption style preset (without .json).
+                          Options: "default", "minimal", "highlight"
     """
+    
+    preset = load_caption_preset(style_preset)
     
     # Set API key
     if api_key:
@@ -95,13 +128,17 @@ def create_captions_video(video_path, output_path, api_key=None):
     # Video dimensions
     W, H = video.size
     
-    # Styling Configuration
-    font_size = int(H * 0.05) # Dynamic font size based on height
-    font = 'Arial-Bold'
-    text_color = 'white'
-    stroke_color = 'black'
-    stroke_width = 2
-    bg_color = None # Transparent background for text clip itself
+    # Styling Configuration from preset
+    font_size = int(H * preset["font_size_ratio"])
+    font = preset["font"]
+    text_color = preset["color"]
+    stroke_color = preset["stroke_color"]
+    stroke_width = preset["stroke_width"]
+    bg_color = preset["bg_color"]
+    max_chars_ratio = preset["max_width_ratio"]
+    pos_x = preset["position"]["x"]
+    pos_y = preset["position"]["y"]
+    animation_type = preset["animation_type"]
     
     # Create the base video clip
     captions.append(video)
@@ -114,7 +151,7 @@ def create_captions_video(video_path, output_path, api_key=None):
         # Word wrapping to ensure text fits on screen
         # Estimate chars per line based on width and font size (rough approximation)
         # Assuming avg char width is 0.5 * font_size
-        max_chars_line = int((W * 0.8) / (font_size * 0.5))
+        max_chars_line = int((W * max_chars_ratio) / (font_size * 0.5))
         wrapped_text = "\n".join(textwrap.wrap(text, width=max_chars_line))
 
         # Create TextClip
@@ -125,13 +162,14 @@ def create_captions_video(video_path, output_path, api_key=None):
                 fontsize=font_size, 
                 font=font, 
                 color=text_color, 
-                bg_color='black',
-                stroke_width=0,
+                bg_color=bg_color if bg_color else 'transparent',
+                stroke_width=stroke_width,
+                stroke_color=stroke_color,
                 align='center'
             )
             
-            # Position the text at the bottom center
-            txt_clip = txt_clip.set_position(('center', 0.8), relative=True) # 80% down
+            # Position the text based on preset
+            txt_clip = txt_clip.set_position((pos_x, pos_y), relative=True)
             txt_clip = txt_clip.set_start(start_time).set_end(end_time)
             
             captions.append(txt_clip)
@@ -162,9 +200,10 @@ if __name__ == "__main__":
     parser.add_argument("input_video", help="Path to input video file")
     parser.add_argument("output_video", help="Path to output video file")
     parser.add_argument("--api_key", help="OpenAI API Key (optional if set in .env)", default=None)
+    parser.add_argument("--style", help="Caption style preset (default, minimal, highlight)", default="default")
     
     args = parser.parse_args()
     
-    create_captions_video(args.input_video, args.output_video, args.api_key)
+    create_captions_video(args.input_video, args.output_video, args.api_key, args.style)
 
 # print("ni hao, zao jiu hao le")
