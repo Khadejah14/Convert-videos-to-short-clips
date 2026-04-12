@@ -22,6 +22,15 @@ with st.sidebar:
         help="Generate 1-3 clips from the video"
     )
     
+    clip_length = st.slider(
+        "Clip Length (seconds)",
+        min_value=15,
+        max_value=60,
+        step=15,
+        value=30,
+        help="Target duration for each clip: 15s, 30s, or 60s"
+    )
+    
     st.divider()
     
     caption_style = st.selectbox(
@@ -90,19 +99,20 @@ if video_file:
             st.text_area("", full_text, height=200)
             
             clip_count_placeholder = clip_count
+            clip_length_placeholder = clip_length
             
             response = openai.chat.completions.create(
                 model="gpt-4",
                 messages=[{
                     "role": "system",
-                    "content": """You are an Expert Viral Content Strategist. Your goal is to identify the best segments from a video transcript for YouTube Shorts. You must identify exactly 3 different clips based on these categories:
+                    "content": f"""You are an Expert Viral Content Strategist. Your goal is to identify the best segments from a video transcript for YouTube Shorts. You must identify exactly 3 different clips based on these categories:
 
 1. **HOOK FOCUS**: The strongest opening grab - first words that stop the scroll
 2. **EMOTIONAL PEAK**: Laughter, surprise, awe, or a powerful insight moment  
 3. **VIRAL MOMENT**: Most shareable, quotable, or memorable segment
 
 IMPORTANT RULES:
-- Each clip must be between 15-30 seconds
+- Each clip must be between {clip_length_placeholder - 5}-{clip_length_placeholder} seconds
 - Clips CANNOT overlap (use different timestamps for each)
 - Each clip must be complete and make sense on its own
 - Prioritize clips with clear beginnings and endings
@@ -144,16 +154,21 @@ TRANSCRIPT:
             all_matches = re.findall(pattern, analysis, re.DOTALL)
             
             clips_data = []
+            min_clip = clip_length - 5
+            max_clip = clip_length + 5
+            
             for match in all_matches:
                 clip_num = int(match[0])
                 start_time = float(match[1])
                 end_time = float(match[2])
+                clip_duration = end_time - start_time
                 
-                if 15 <= (end_time - start_time) <= 35:
+                if min_clip <= clip_duration <= max_clip:
                     clips_data.append({
                         'number': clip_num,
                         'start': start_time,
-                        'end': end_time
+                        'end': end_time,
+                        'duration': clip_duration
                     })
             
             clips_data.sort(key=lambda x: x['start'])
@@ -185,7 +200,7 @@ TRANSCRIPT:
                 progress_bar.empty()
                 status_text.empty()
             else:
-                st.success(f"Found {len(clips_data)} valid clip(s)")
+                st.success(f"Found {len(clips_data)} valid clip(s) (target: {clip_length}s)")
                 
                 clip_categories = {
                     1: "Hook Focus",
@@ -297,13 +312,15 @@ TRANSCRIPT:
                     
                     for tab, (clip_num, clip_data) in zip(tabs, final_clips.items()):
                         with tab:
-                            col1, col2, col3 = st.columns(3)
+                            col1, col2, col3, col4 = st.columns(4)
                             with col1:
                                 st.metric("Start", f"{clip_data['start']:.1f}s")
                             with col2:
                                 st.metric("End", f"{clip_data['end']:.1f}s")
                             with col3:
                                 st.metric("Duration", f"{clip_data['duration']:.1f}s")
+                            with col4:
+                                st.metric("Target", f"{clip_length}s")
                             
                             st.subheader("Final Video")
                             st.video(clip_data['final'])
