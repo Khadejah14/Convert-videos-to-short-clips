@@ -1,0 +1,6 @@
+# Snappy Profile
+# Lower smoothing = faster, more responsive camera movements
+# Good for action-packed content or shorter clips
+
+smoothing_factor: 0.05
+min_face_size: 0.15

@@ -1,0 +1,12 @@
+{
+    "font_size_ratio": 0.04,
+    "font": "Arial",
+    "text_color": "white",
+    "stroke_color": "black",
+    "stroke_width": 1,
+    "background_color": null,
+    "position": {
+        "horizontal": "center",
+        "vertical_ratio": 0.85
+    }
+}

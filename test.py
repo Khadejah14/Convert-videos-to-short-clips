@@ -36,7 +36,20 @@ video_file = st.file_uploader("Upload Video", type=['mp4', 'avi', 'mov'])
 if video_file:
     
     if st.button("Process Video"):
-        with st.spinner("Processing..."):
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+        
+        def update_progress(step, total_steps=6):
+            progress = int((step / total_steps) * 100)
+            progress_bar.progress(progress)
+        
+        def set_status(text):
+            status_text.text(text)
+        
+        try:
+            set_status("Step 1/6: Extracting audio...")
+            update_progress(0)
+            
             with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_video:
                 tmp_video.write(video_file.read())
                 video_path = tmp_video.name
@@ -45,6 +58,9 @@ if video_file:
             audio_path = tempfile.mktemp(suffix='.mp3')
             video.audio.write_audiofile(audio_path, verbose=False, logger=None)
             video.close()
+            
+            update_progress(1)
+            set_status("Step 2/6: Transcribing audio...")
             
             with open(audio_path, 'rb') as audio_file:
                 transcript = openai.audio.transcriptions.create(
@@ -55,6 +71,17 @@ if video_file:
                 )
             
             st.subheader("Transcription")
+            
+            full_text = ""
+            for segment in transcript.segments:
+                full_text += f"[{segment.start:.1f}s - {segment.end:.1f}s] {segment.text}\n"
+            
+            st.text_area("", full_text, height=200)
+            
+            clip_count_placeholder = clip_count
+            
+            update_progress(2)
+            set_status("Step 3/6: GPT analyzing content...")
             
             full_text = ""
             for segment in transcript.segments:
@@ -110,6 +137,9 @@ TRANSCRIPT:
             analysis = response.choices[0].message.content
             st.write(analysis)
             
+            update_progress(3)
+            set_status("Step 4/6: Extracting clips...")
+            
             pattern = r'(?i)clip\s*(\d+).*?start[:\s]*\*?(\d+(?:\.\d+)?).*?end[:\s]*\*?(\d+(?:\.\d+)?)'
             all_matches = re.findall(pattern, analysis, re.DOTALL)
             
@@ -152,6 +182,8 @@ TRANSCRIPT:
                     st.code(analysis)
                 os.unlink(video_path)
                 os.unlink(audio_path)
+                progress_bar.empty()
+                status_text.empty()
             else:
                 st.success(f"Found {len(clips_data)} valid clip(s)")
                 
@@ -184,8 +216,8 @@ TRANSCRIPT:
                     clip.close()
                     video.close()
                     
-                    progress_bar.progress(30)
-                    status_text.text(f"Cropping {category} to vertical...")
+                    update_progress(4)
+                    set_status(f"Step 5/6: Cropping {category} to vertical...")
                     
                     try:
                         from crop_videos import SmartVerticalCropper
@@ -195,8 +227,8 @@ TRANSCRIPT:
                         crop_success = cropper.crop_video(clip_path, cropped_path)
                         
                         if crop_success:
-                            progress_bar.progress(60)
-                            status_text.text(f"Adding captions to {category}...")
+                            update_progress(5)
+                            set_status(f"Step 6/6: Adding captions to {category}...")
                             
                             from captions import create_captions_video
                             
@@ -218,7 +250,7 @@ TRANSCRIPT:
                                     'duration': duration
                                 }
                                 progress_bar.progress(100)
-                                status_text.text(f"{category} complete!")
+                                set_status(f"{category} complete!")
                             else:
                                 final_clips[clip_num_display] = {
                                     'category': category,
@@ -230,7 +262,7 @@ TRANSCRIPT:
                                     'no_captions': True
                                 }
                                 progress_bar.progress(100)
-                                status_text.text(f"{category} complete (no captions)")
+                                set_status(f"{category} complete (no captions)")
                         else:
                             final_clips[clip_num_display] = {
                                 'category': category,
@@ -242,7 +274,7 @@ TRANSCRIPT:
                                 'no_crop': True
                             }
                             progress_bar.progress(100)
-                            status_text.text(f"{category} complete (no crop)")
+                            set_status(f"{category} complete (no crop)")
                             
                     except Exception as e:
                         st.error(f"Error processing {category}: {e}")
@@ -256,9 +288,6 @@ TRANSCRIPT:
                             'error': str(e)
                         }
                         progress_bar.progress(100)
-                    
-                    progress_bar.empty()
-                    status_text.empty()
                 
                 st.divider()
                 st.header("Generated Clips")
@@ -353,5 +382,15 @@ TRANSCRIPT:
             
             os.unlink(video_path)
             os.unlink(audio_path)
+        
+        except Exception as e:
+            st.error(f"Processing failed: {e}")
+            import traceback
+            with st.expander("Error Details"):
+                st.code(traceback.format_exc())
+        
+        finally:
+            progress_bar.empty()
+            status_text.empty()
 
 print("hello from someone u don't know lol")

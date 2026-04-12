@@ -39,9 +39,28 @@ class SmartVerticalCropper:
     # ------------------------------------------------------------------
 
     def _initialize_dnn_detector(self):
-        prototxt = "deploy.prototxt"
-        caffemodel = "res10_300x300_ssd_iter_140000.caffemodel"
-        if os.path.exists(prototxt) and os.path.exists(caffemodel):
+        model_dir = Path(__file__).parent / "assets" / "config" / "model_weights"
+        root_dir = Path(__file__).parent
+        
+        prototxt_paths = [
+            model_dir / "deploy.prototxt",
+            root_dir / "deploy.prototxt"
+        ]
+        caffemodel_paths = [
+            model_dir / "res10_300x300_ssd_iter_140000.caffemodel",
+            root_dir / "res10_300x300_ssd_iter_140000.caffemodel"
+        ]
+        
+        prototxt = None
+        caffemodel = None
+        
+        for pp, cp in zip(prototxt_paths, caffemodel_paths):
+            if pp.exists() and cp.exists():
+                prototxt = str(pp)
+                caffemodel = str(cp)
+                break
+        
+        if prototxt and caffemodel:
             try:
                 self.dnn_net = cv2.dnn.readNetFromCaffe(prototxt, caffemodel)
                 self.use_dnn = True
