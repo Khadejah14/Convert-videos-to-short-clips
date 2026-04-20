@@ -8,18 +8,14 @@ CLIP_CATEGORIES = {
 }
 
 
-def analyze_transcript_for_clips(transcript_text, clip_count, clip_length, api_key=None):
+def analyze_clips_with_gpt(transcript_text, clip_count, clip_length, api_key=None):
     if api_key:
         openai.api_key = api_key
 
     min_duration = clip_length - 5
     max_duration = clip_length
 
-    response = openai.chat.completions.create(
-        model="gpt-4",
-        messages=[{
-            "role": "system",
-            "content": f"""You are an Expert Viral Content Strategist. Your goal is to identify the best segments from a video transcript for YouTube Shorts. You must identify exactly 3 different clips based on these categories:
+    system_prompt = f"""You are an Expert Viral Content Strategist. Your goal is to identify the best segments from a video transcript for YouTube Shorts. You must identify exactly {clip_count} different clips based on these categories:
 
 1. **HOOK FOCUS**: The strongest opening grab - first words that stop the scroll
 2. **EMOTIONAL PEAK**: Laughter, surprise, awe, or a powerful insight moment  
@@ -31,9 +27,8 @@ IMPORTANT RULES:
 - Each clip must be complete and make sense on its own
 - Prioritize clips with clear beginnings and endings
 - Look for universal human experiences that resonate broadly"""
-        }, {
-            "role": "user",
-            "content": f"""Analyze this transcript and identify the best {clip_count} clips for YouTube Shorts.
+
+    user_prompt = f"""Analyze this transcript and identify the best {clip_count} clips for YouTube Shorts.
 
 OUTPUT FORMAT - EXACTLY FOLLOW THIS PATTERN:
 ```
@@ -54,7 +49,13 @@ If fewer than 3 good clips exist, still follow the format but note in reasoning 
 
 TRANSCRIPT:
 {transcript_text}"""
-        }]
+
+    response = openai.chat.completions.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ]
     )
 
     return response.choices[0].message.content

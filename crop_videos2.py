@@ -366,7 +366,7 @@ class SmartVerticalCropper:
         if os.path.exists(cmd_file_path):
             os.remove(cmd_file_path)
 
-        print(f"\n✓ Successfully created vertical video: {output_path}")
+        print(f"\n[OK] Successfully created vertical video: {output_path}")
         print(f"  Original  : {width}x{height}")
         print(f"  Output    : {crop_width}x{crop_height}")
         print(f"  CRF used  : {crf}  (lower = better quality)")

@@ -135,10 +135,16 @@ def create_captions_video(video_path, output_path, api_key=None, style_preset="d
     stroke_color = preset["stroke_color"]
     stroke_width = preset["stroke_width"]
     bg_color = preset["bg_color"]
-    max_chars_ratio = preset["max_width_ratio"]
-    pos_x = preset["position"]["x"]
+    max_chars_ratio = preset.get("max_width_ratio", 0.8)
     pos_y = preset["position"]["y"]
-    animation_type = preset["animation_type"]
+    
+    pos_x_str = preset["position"].get("x", "center")
+    if pos_x_str == "center":
+        pos_x = 0.5
+    else:
+        pos_x = float(pos_x_str)
+    
+    animation_type = preset.get("animation_type", "static")
     
     # Create the base video clip
     captions.append(video)

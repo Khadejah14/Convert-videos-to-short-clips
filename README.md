@@ -32,7 +32,7 @@ A Python application that automatically converts long videos into engaging verti
 ## Usage
 
 ```bash
-streamlit run test.py
+streamlit run app.py
 ```
 
 Open your browser to `http://localhost:8501`.

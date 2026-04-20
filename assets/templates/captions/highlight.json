@@ -1,12 +1,11 @@
 {
-    "font_size_ratio": 0.06,
     "font": "Arial-Bold",
-    "text_color": "#FFD700",
-    "stroke_color": "black",
+    "font_size_ratio": 0.06,
+    "color": "#FFD700",
+    "bg_color": "black",
     "stroke_width": 3,
-    "background_color": "black",
-    "position": {
-        "horizontal": "center",
-        "vertical_ratio": 0.75
-    }
+    "stroke_color": "black",
+    "position": {"x": "center", "y": 0.75},
+    "max_width_ratio": 0.8,
+    "animation_type": "static"
 }

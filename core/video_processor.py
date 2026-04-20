@@ -4,8 +4,8 @@ import tempfile
 import os
 
 from core.transcription import extract_audio
-from core.analysis import analyze_transcript_for_clips, format_transcript_with_timestamps
-from core.clip_extraction import parse_clips_from_analysis
+from core.clip_analyzer import analyze_clips_with_gpt, format_transcript_with_timestamps
+from core.clip_generator import parse_clip_timestamps
 from utils.file_utils import get_temp_path, cleanup_files
 
 
@@ -56,7 +56,7 @@ class VideoProcessor:
     
     def analyze_clips(self):
         transcript_text = self.get_transcript_text()
-        analysis = analyze_transcript_for_clips(
+        analysis = analyze_clips_with_gpt(
             transcript_text,
             self.clip_count,
             self.clip_length,
@@ -65,7 +65,7 @@ class VideoProcessor:
         return analysis
     
     def extract_clips(self, analysis):
-        self.clips_data = parse_clips_from_analysis(analysis, self.clip_length, self.clip_count)
+        self.clips_data = parse_clip_timestamps(analysis, self.clip_length, self.clip_count)
         return self.clips_data
     
     def extract_clip_video(self, start_time, end_time):

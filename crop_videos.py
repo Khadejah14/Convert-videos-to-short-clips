@@ -334,7 +334,7 @@ class SmartVerticalCropper:
                 import shutil
                 shutil.move(temp_video_path, output_path)
 
-        print(f"\n✓ Successfully created vertical video: {output_path}")
+        print(f"\n[OK] Successfully created vertical video: {output_path}")
         print(f"  Original: {width}x{height}")
         print(f"  Cropped:  {crop_width}x{crop_height}")
         
