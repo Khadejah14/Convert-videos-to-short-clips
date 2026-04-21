@@ -21,8 +21,8 @@ def parse_clip_timestamps(analysis_text, clip_length, max_clips=3):
     matches = CLIP_PATTERN.findall(analysis_text)
     
     clips_data = []
-    min_clip = 3
-    max_clip = clip_length * 2
+    min_clip = clip_length - 5
+    max_clip = clip_length
     
     for match in matches:
         clip_num = int(match[0])
@@ -37,6 +37,21 @@ def parse_clip_timestamps(analysis_text, clip_length, max_clips=3):
                 'end': end_time,
                 'duration': clip_duration
             })
+    
+    if not clips_data:
+        for match in matches:
+            clip_num = int(match[0])
+            start_time = float(match[1])
+            end_time = float(match[2])
+            clip_duration = end_time - start_time
+            
+            if clip_duration >= 3:
+                clips_data.append({
+                    'number': clip_num,
+                    'start': start_time,
+                    'end': end_time,
+                    'duration': clip_duration
+                })
     
     clips_data.sort(key=lambda x: x['start'])
     

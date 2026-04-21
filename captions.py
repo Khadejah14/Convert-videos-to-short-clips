@@ -134,15 +134,13 @@ def create_captions_video(video_path, output_path, api_key=None, style_preset="d
     text_color = preset["color"]
     stroke_color = preset["stroke_color"]
     stroke_width = preset["stroke_width"]
-    bg_color = preset["bg_color"]
+    bg_color = preset.get("background_color") or preset.get("bg_color", "black")
     max_chars_ratio = preset.get("max_width_ratio", 0.8)
-    pos_y = preset["position"]["y"]
     
-    pos_x_str = preset["position"].get("x", "center")
-    if pos_x_str == "center":
-        pos_x = 0.5
-    else:
-        pos_x = float(pos_x_str)
+    pos_dict = preset.get("position", {})
+    pos_y = pos_dict.get("vertical_ratio", pos_dict.get("y", 0.85))
+    pos_x_str = pos_dict.get("horizontal", pos_dict.get("x", "center"))
+    pos_x = 0.5 if pos_x_str == "center" else float(pos_x_str)
     
     animation_type = preset.get("animation_type", "static")
     
@@ -154,28 +152,44 @@ def create_captions_video(video_path, output_path, api_key=None, style_preset="d
         end_time = segment.end
         text = segment.text.strip()
         
+        if not text:
+            continue
+        
+        clip_duration = end_time - start_time
+        if clip_duration < 0.3:
+            end_time = start_time + 0.3
+        
         # Word wrapping to ensure text fits on screen
-        # Estimate chars per line based on width and font size (rough approximation)
-        # Assuming avg char width is 0.5 * font_size
-        max_chars_line = int((W * max_chars_ratio) / (font_size * 0.5))
-        wrapped_text = "\n".join(textwrap.wrap(text, width=max_chars_line))
-
+        # Use more conservative char width estimate (avg char ~0.6 * font_size for most fonts)
+        max_chars_line = int((W * max_chars_ratio) / (font_size * 0.6))
+        max_chars_line = max(max_chars_line, 10)
+        
+        wrapped_lines = textwrap.wrap(text, width=max_chars_line)
+        wrapped_text = "\n".join(wrapped_lines)
+        
+        # Adjust font size for multi-line text to ensure readability
+        num_lines = len(wrapped_lines)
+        if num_lines > 2:
+            adjusted_font_size = int(font_size * 0.8)
+        else:
+            adjusted_font_size = font_size
+        
         # Create TextClip
         # Note: TextClip requires ImageMagick to be installed and configured.
         try:
             txt_clip = TextClip(
                 wrapped_text, 
-                fontsize=font_size, 
+                fontsize=adjusted_font_size, 
                 font=font, 
                 color=text_color, 
-                bg_color=bg_color if bg_color else 'transparent',
+                bg_color=bg_color,
                 stroke_width=stroke_width,
                 stroke_color=stroke_color,
                 align='center'
             )
             
-            # Position the text based on preset
-            txt_clip = txt_clip.set_position((pos_x, pos_y), relative=True)
+            # Position the text based on preset (bottom-center with padding)
+            txt_clip = txt_clip.set_position(('center', 'bottom'))
             txt_clip = txt_clip.set_start(start_time).set_end(end_time)
             
             captions.append(txt_clip)
