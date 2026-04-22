@@ -319,17 +319,12 @@ class SmartVerticalCropper:
             cmd_file.write("\n".join(cmd_lines))
             cmd_file_path = cmd_file.name
 
-        # ---- Single-pass FFmpeg encode ----
-        # sendcmd reads the per-frame x positions and drives the crop filter.
-        # Audio is stream-copied (no re-encode) → zero audio quality loss.
-        # Video is encoded once with H.264 at the chosen CRF.
+        # ---- Simple static center crop ----
+        crop_x = (width - crop_width) // 2
         print(f"Encoding with FFmpeg (CRF={crf}, preset={preset})…")
         print("This is a single-pass encode — no quality degradation from double compression.")
 
-        vf_filter = (
-            f"sendcmd=f={cmd_file_path},"
-            f"crop={crop_width}:{crop_height}"
-        )
+        vf_filter = f"crop={crop_width}:{crop_height}:{crop_x}:0"
 
         ffmpeg_cmd = [
             "ffmpeg", "-y",
@@ -351,20 +346,11 @@ class SmartVerticalCropper:
             )
             if result.returncode != 0:
                 print("FFmpeg error output:")
-                print(result.stderr[-3000:])  # last 3000 chars of stderr
-                # Clean up
-                if os.path.exists(cmd_file_path):
-                    os.remove(cmd_file_path)
+                print(result.stderr[-3000:])
                 return False
         except Exception as e:
             print(f"FFmpeg execution error: {e}")
-            if os.path.exists(cmd_file_path):
-                os.remove(cmd_file_path)
             return False
-
-        # Clean up temp filter file
-        if os.path.exists(cmd_file_path):
-            os.remove(cmd_file_path)
 
         print(f"\n[OK] Successfully created vertical video: {output_path}")
         print(f"  Original  : {width}x{height}")
