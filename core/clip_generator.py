@@ -4,10 +4,11 @@ from moviepy.editor import VideoFileClip
 from utils.file_utils import get_temp_path, cleanup_files
 
 
-CLIP_PATTERN = re.compile(
-    r'(?i)clip\s*(\d+).*?start[:\s]*(\d+(?:\.\d+)?)\s*s?.*?end[:\s]*(\d+(?:\.\d+)?)\s*s?',
-    re.DOTALL
-)
+CLIP_CATEGORIES = {
+    1: "Hook Focus",
+    2: "Emotional Peak",
+    3: "Viral Moment"
+}
 
 
 CLIP_CATEGORIES = {
@@ -18,44 +19,72 @@ CLIP_CATEGORIES = {
 
 
 def parse_clip_timestamps(analysis_text, clip_length, max_clips=3):
-    matches = CLIP_PATTERN.findall(analysis_text)
-    
-    clips_data = []
     min_clip = clip_length - 5
     max_clip = clip_length
     
-    for match in matches:
-        clip_num = int(match[0])
-        start_time = float(match[1])
-        end_time = float(match[2])
-        clip_duration = end_time - start_time
+    all_timestamps = []
+    
+    pattern1 = re.compile(r'(?i)start[:\s]*(\d+(?:\.\d+)?)\s*(?:s|sec)?', re.DOTALL)
+    pattern2 = re.compile(r'(?i)end[:\s]*(\d+(?:\.\d+)?)\s*(?:s|sec)?', re.DOTALL)
+    
+    blocks = re.split(r'(?i)(?:clip|segment)\s*\d+', analysis_text)
+    
+    clip_num = 1
+    for block in blocks:
+        if not block.strip():
+            continue
         
-        if min_clip <= clip_duration <= max_clip:
-            clips_data.append({
-                'number': clip_num,
-                'start': start_time,
-                'end': end_time,
-                'duration': clip_duration
-            })
+        starts = pattern1.findall(block)
+        ends = pattern2.findall(block)
+        
+        if starts and ends:
+            for start, end in zip(starts[:3], ends[:3]):
+                s = float(start)
+                e = float(end)
+                duration = e - s
+                
+                if duration < 3:
+                    e = s + clip_length
+                    duration = clip_length
+                
+                if min_clip <= duration <= max_clip:
+                    all_timestamps.append({
+                        'number': clip_num,
+                        'start': s,
+                        'end': e,
+                        'duration': duration
+                    })
+                    clip_num += 1
     
-    if not clips_data:
-        for match in matches:
-            clip_num = int(match[0])
-            start_time = float(match[1])
-            end_time = float(match[2])
-            clip_duration = end_time - start_time
+    if not all_timestamps:
+        for block in blocks:
+            if not block.strip():
+                continue
             
-            if clip_duration >= 3:
-                clips_data.append({
-                    'number': clip_num,
-                    'start': start_time,
-                    'end': end_time,
-                    'duration': clip_duration
-                })
+            starts = pattern1.findall(block)
+            ends = pattern2.findall(block)
+            
+            for start, end in zip(starts[:3], ends[:3]):
+                s = float(start)
+                e = float(end)
+                duration = e - s
+                
+                if duration < 3:
+                    e = s + clip_length
+                    duration = clip_length
+                
+                if duration >= 3:
+                    all_timestamps.append({
+                        'number': clip_num,
+                        'start': s,
+                        'end': e,
+                        'duration': duration
+                    })
+                    clip_num += 1
     
-    clips_data.sort(key=lambda x: x['start'])
+    all_timestamps.sort(key=lambda x: x['start'])
     
-    deduplicated = _remove_overlapping_clips(clips_data)
+    deduplicated = _remove_overlapping_clips(all_timestamps)
     
     return deduplicated[:max_clips]
 

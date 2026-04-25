@@ -30,5 +30,15 @@ def render_sidebar():
             index=0,
             help="default: Solid black background | minimal: Transparent, subtle | highlight: Bold, word emphasis"
         )
+        
+        st.divider()
+        
+        st.subheader("Advanced")
+        
+        use_vision = st.checkbox(
+            "Enable GPT-4o Vision Analysis",
+            value=False,
+            help="Uses GPT-4o vision to analyze keyframes for visual hooks. More accurate but uses more API credits."
+        )
     
-    return clip_count, clip_length, caption_style
+    return clip_count, clip_length, caption_style, use_vision

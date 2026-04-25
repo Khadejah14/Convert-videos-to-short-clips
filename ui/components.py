@@ -45,7 +45,7 @@ def render_progress_step(progress_ui, step, total_steps=6):
             progress_ui.set_status(STEP_MESSAGES[step])
 
 
-def render_clip_card(clip_num, clip_data, clip_length):
+def render_clip_card(clip_num, clip_data, clip_length, is_winner=False, use_vision=False, vision_data=None):
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Start", f"{clip_data['start']:.1f}s")
@@ -55,6 +55,16 @@ def render_clip_card(clip_num, clip_data, clip_length):
         st.metric("Duration", f"{clip_data['duration']:.1f}s")
     with col4:
         st.metric("Target", f"{clip_length}s")
+    
+    if use_vision and vision_data:
+        score_col1, score_col2 = st.columns(2)
+        with score_col1:
+            st.metric("Text Score", f"{vision_data.get('text_score', 0):.1f}")
+        with score_col2:
+            st.metric("Visual Score", f"{vision_data.get('visual_score', 0):.1f}")
+    
+    if is_winner and vision_data and vision_data.get('visual_hook_description'):
+        st.success(f"**Visual Hook:** {vision_data['visual_hook_description']}")
     
     st.subheader("Final Video")
     st.video(clip_data['final'])

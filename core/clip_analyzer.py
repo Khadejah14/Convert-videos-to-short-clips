@@ -15,37 +15,41 @@ def analyze_clips_with_gpt(transcript_text, clip_count, clip_length, api_key=Non
     min_duration = clip_length - 5
     max_duration = clip_length
 
-    system_prompt = f"""You are an Expert Viral Content Strategist. Your goal is to identify the best segments from a video transcript for YouTube Shorts. You must identify exactly {clip_count} different clips based on these categories:
+    system_prompt = f"""You are an Expert Viral Content Strategist. Your job is to identify exactly {clip_count} video segments that are EXACTLY {clip_length} seconds long (tolerance: {min_duration}-{max_duration} seconds).
 
-1. **HOOK FOCUS**: The strongest opening grab - first words that stop the scroll
-2. **EMOTIONAL PEAK**: Laughter, surprise, awe, or a powerful insight moment  
-3. **VIRAL MOMENT**: Most shareable, quotable, or memorable segment
+CRITICAL REQUIREMENTS:
+1. Each clip MUST be {clip_length} seconds long - this is non-negotiable
+2. Clips CANNOT overlap - use completely different time ranges
+3. Pick segments with clear, complete narratives
+4. Start clips at natural transition points when possible
 
-IMPORTANT RULES:
-- Each clip must be between {min_duration}-{max_duration} seconds
-- Clips CANNOT overlap (use different timestamps for each)
-- Each clip must be complete and make sense on its own
-- Prioritize clips with clear beginnings and endings
-- Look for universal human experiences that resonate broadly"""
+OUTPUT FORMAT - STRICTLY FOLLOW THIS PATTERN:
+```
+CLIP 1 - [CATEGORY]:
+START: [number] END: [number]
+```
 
-    user_prompt = f"""Analyze this transcript and identify the best {clip_count} clips for YouTube Shorts.
+Example: If clip 1 starts at 0s and should be {clip_length}s long, output START: 0 END: {clip_length}
 
-OUTPUT FORMAT - EXACTLY FOLLOW THIS PATTERN:
+TRANSCRIPT:
+{transcript_text}"""
+
+    user_prompt = f"""Extract exactly {clip_count} clips of {clip_length} seconds each from this transcript.
+
+CRITICAL: Your START and END values must result in clips that are {clip_length} seconds long!
+Example: If START is 0, then END must be {clip_length}
+
+Follow the format exactly:
 ```
 CLIP 1 - HOOK FOCUS:
-REASONING: [Brief explanation why this is the best hook - what makes it grab attention immediately]
-START:X END:Y
+START: [0] END: [{clip_length}]
 
 CLIP 2 - EMOTIONAL PEAK:
-REASONING: [Brief explanation of the emotional impact - what makes viewers feel something]
-START:X END:Y
+START: [X] END: [X+{clip_length}]
 
 CLIP 3 - VIRAL MOMENT:
-REASONING: [Brief explanation of why this is shareable - what makes people want to send it to friends]
-START:X END:Y
+START: [Y] END: [Y+{clip_length}]
 ```
-
-If fewer than 3 good clips exist, still follow the format but note in reasoning if a clip is suboptimal.
 
 TRANSCRIPT:
 {transcript_text}"""
