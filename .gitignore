@@ -1,6 +1,37 @@
 .env
 __pycache__/
 *.pyc
-.env
 *.caffemodel
 assets/config/model_weights/*.caffemodel
+
+# Storage
+storage/
+*.mp4
+*.mp3
+*.avi
+*.mov
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environment
+venv/
+.venv/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Logs
+*.log

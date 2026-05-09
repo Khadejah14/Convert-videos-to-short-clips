@@ -1,6 +1,29 @@
-opencv-python
-numpy
-moviepy
-openai
-python-dotenv
-streamlit
+# FastAPI & Server
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+
+# Database
+sqlalchemy[asyncio]==2.0.25
+asyncpg==0.29.0
+psycopg2-binary==2.9.9
+alembic==1.13.1
+
+# Celery & Redis
+celery[redis]==5.3.6
+redis==5.0.1
+flower==2.0.1
+
+# Video Processing
+opencv-python==4.9.0.80
+numpy==1.26.3
+moviepy==1.0.3
+
+# AI
+openai==1.12.0
+
+# Utilities
+python-dotenv==1.0.1
+pydantic==2.5.3
+pydantic-settings==2.1.0
+pyyaml==6.0.1
