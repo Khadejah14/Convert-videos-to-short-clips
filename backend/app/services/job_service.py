@@ -19,7 +19,12 @@ class JobService:
         self.db = db
 
     async def create_job(
-        self, file_bytes: bytes, filename: str, config: JobCreate
+        self,
+        file_bytes: bytes,
+        filename: str,
+        config: JobCreate,
+        owner_id: uuid.UUID | None = None,
+        project_id: uuid.UUID | None = None,
     ) -> JobResponse:
         os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
         os.makedirs(settings.OUTPUT_DIR, exist_ok=True)
@@ -33,6 +38,8 @@ class JobService:
 
         job = Job(
             id=job_id,
+            owner_id=owner_id,
+            project_id=project_id,
             status=JobStatus.PENDING,
             original_filename=filename,
             video_path=video_path,
@@ -50,12 +57,14 @@ class JobService:
 
         return JobResponse.model_validate(job)
 
-    async def get_job(self, job_id: uuid.UUID) -> JobStatusResponse | None:
-        result = await self.db.execute(
-            select(Job)
-            .where(Job.id == job_id)
-            .options(selectinload(Job.clips))
-        )
+    async def get_job(
+        self, job_id: uuid.UUID, owner_id: uuid.UUID | None = None
+    ) -> JobStatusResponse | None:
+        query = select(Job).where(Job.id == job_id).options(selectinload(Job.clips))
+        if owner_id is not None:
+            query = query.where(Job.owner_id == owner_id)
+
+        result = await self.db.execute(query)
         job = result.scalar_one_or_none()
 
         if not job:
@@ -92,23 +101,34 @@ class JobService:
         return response
 
     async def list_jobs(
-        self, page: int = 1, per_page: int = 20
+        self,
+        page: int = 1,
+        per_page: int = 20,
+        owner_id: uuid.UUID | None = None,
     ) -> tuple[list[JobResponse], int]:
-        count_result = await self.db.execute(select(func.count(Job.id)))
+        base = select(func.count(Job.id))
+        if owner_id is not None:
+            base = base.where(Job.owner_id == owner_id)
+        count_result = await self.db.execute(base)
         total = count_result.scalar()
 
-        result = await self.db.execute(
-            select(Job)
-            .order_by(Job.created_at.desc())
-            .offset((page - 1) * per_page)
-            .limit(per_page)
-        )
+        query = select(Job).order_by(Job.created_at.desc())
+        if owner_id is not None:
+            query = query.where(Job.owner_id == owner_id)
+        query = query.offset((page - 1) * per_page).limit(per_page)
+
+        result = await self.db.execute(query)
         jobs = result.scalars().all()
 
         return [JobResponse.model_validate(job) for job in jobs], total
 
-    async def cancel_job(self, job_id: uuid.UUID) -> bool:
-        result = await self.db.execute(select(Job).where(Job.id == job_id))
+    async def cancel_job(
+        self, job_id: uuid.UUID, owner_id: uuid.UUID | None = None
+    ) -> bool:
+        query = select(Job).where(Job.id == job_id)
+        if owner_id is not None:
+            query = query.where(Job.owner_id == owner_id)
+        result = await self.db.execute(query)
         job = result.scalar_one_or_none()
 
         if not job:
@@ -132,10 +152,13 @@ class JobService:
 
         return True
 
-    async def delete_job(self, job_id: uuid.UUID) -> bool:
-        result = await self.db.execute(
-            select(Job).where(Job.id == job_id).options(selectinload(Job.clips))
-        )
+    async def delete_job(
+        self, job_id: uuid.UUID, owner_id: uuid.UUID | None = None
+    ) -> bool:
+        query = select(Job).where(Job.id == job_id).options(selectinload(Job.clips))
+        if owner_id is not None:
+            query = query.where(Job.owner_id == owner_id)
+        result = await self.db.execute(query)
         job = result.scalar_one_or_none()
 
         if not job:
@@ -164,15 +187,26 @@ class JobService:
         return True
 
     async def get_clip_file_path(
-        self, job_id: uuid.UUID, clip_id: uuid.UUID, file_type: str
+        self,
+        job_id: uuid.UUID,
+        clip_id: uuid.UUID,
+        file_type: str,
+        owner_id: uuid.UUID | None = None,
     ) -> str | None:
-        result = await self.db.execute(
-            select(Clip).where(Clip.id == clip_id, Clip.job_id == job_id)
-        )
+        query = select(Clip).where(Clip.id == clip_id, Clip.job_id == job_id)
+        result = await self.db.execute(query)
         clip = result.scalar_one_or_none()
 
         if not clip:
             return None
+
+        # Verify ownership through the job
+        if owner_id is not None:
+            job_result = await self.db.execute(
+                select(Job).where(Job.id == job_id, Job.owner_id == owner_id)
+            )
+            if not job_result.scalar_one_or_none():
+                return None
 
         if file_type == "original":
             path = clip.original_path

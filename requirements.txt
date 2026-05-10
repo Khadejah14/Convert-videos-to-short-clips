@@ -8,6 +8,7 @@ sqlalchemy[asyncio]==2.0.25
 asyncpg==0.29.0
 psycopg2-binary==2.9.9
 alembic==1.13.1
+pgvector==0.2.4
 
 # Celery & Redis
 celery[redis]==5.3.6
@@ -27,3 +28,8 @@ python-dotenv==1.0.1
 pydantic==2.5.3
 pydantic-settings==2.1.0
 pyyaml==6.0.1
+
+# Auth
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+pydantic[email]==2.5.3

@@ -34,6 +34,12 @@ class Job(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
+    owner_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), index=True, nullable=True
+    )
+    project_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("projects.id", ondelete="SET NULL"), index=True, nullable=True
+    )
     status: Mapped[JobStatus] = mapped_column(
         Enum(JobStatus), default=JobStatus.PENDING, index=True
     )
@@ -72,6 +78,8 @@ class Job(Base):
     clips: Mapped[list["Clip"]] = relationship(
         back_populates="job", cascade="all, delete-orphan"
     )
+    project: Mapped["Project | None"] = relationship(back_populates="jobs")
+    owner: Mapped["User | None"] = relationship(foreign_keys=[owner_id])
 
 
 class Clip(Base):

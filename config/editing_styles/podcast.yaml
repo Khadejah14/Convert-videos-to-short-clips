@@ -1,0 +1,16 @@
+name: Podcast
+description: Conversational, insight-focused, moderate pacing. For podcast clips and interviews.
+caption_style: karaoke
+zoom_intensity: 0.4
+punch_in_scale: 1.1
+enable_silence_removal: true
+silence_threshold_db: -35
+max_effects_per_minute: 4
+target_energy_curve: steady_build
+preferred_effects:
+  - punch_in
+  - zoom_in
+keywords_emphasis: bold
+keyword_colors:
+  insight: "#00BFFF"
+  quote: "#FFD700"

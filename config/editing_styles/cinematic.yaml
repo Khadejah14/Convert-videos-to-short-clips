@@ -1,0 +1,16 @@
+name: Cinematic
+description: Smooth, emotional, story-driven pacing. For high-quality narrative content.
+caption_style: minimal
+zoom_intensity: 0.3
+punch_in_scale: 1.08
+enable_silence_removal: true
+silence_threshold_db: -40
+max_effects_per_minute: 3
+target_energy_curve: storytelling
+preferred_effects:
+  - zoom_in
+  - cross_dissolve
+  - blur_transition
+keywords_emphasis: italic
+keyword_colors:
+  default: "#E0E0E0"

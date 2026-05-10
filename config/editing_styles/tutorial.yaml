@@ -1,0 +1,17 @@
+name: Tutorial
+description: Clear, step-by-step, emphasis on key instructions. For educational content.
+caption_style: word_by_word
+zoom_intensity: 0.5
+punch_in_scale: 1.15
+enable_silence_removal: true
+silence_threshold_db: -32
+max_effects_per_minute: 5
+target_energy_curve: tutorial
+preferred_effects:
+  - zoom_in
+  - punch_in
+keywords_emphasis: bold
+keyword_colors:
+  step: "#00FF88"
+  warning: "#FF4444"
+  tip: "#FFD700"

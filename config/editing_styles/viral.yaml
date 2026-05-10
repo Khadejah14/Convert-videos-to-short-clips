@@ -1,0 +1,19 @@
+name: Viral
+description: Maximum engagement, fast pacing, strong hooks. Optimized for TikTok/Reels/Shorts.
+caption_style: highlight
+zoom_intensity: 0.7
+punch_in_scale: 1.2
+enable_silence_removal: true
+silence_threshold_db: -30
+max_effects_per_minute: 8
+target_energy_curve: explosive_open
+preferred_effects:
+  - punch_in
+  - zoom_in
+  - flash
+keywords_emphasis: bold
+keyword_colors:
+  power: "#FF4444"
+  number: "#00FF88"
+  name: "#FFD700"
+  emotion: "#FF00FF"

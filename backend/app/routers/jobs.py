@@ -5,6 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.config import get_settings
+from app.core.deps import get_current_user
+from app.models.user import User
 from app.schemas.job import JobCreate, JobResponse, JobStatusResponse, JobListResponse
 from app.services.job_service import JobService
 
@@ -19,7 +21,9 @@ async def create_job(
     clip_length: int = Form(default=30, ge=15, le=60),
     caption_style: str = Form(default="default"),
     use_vision: bool = Form(default=False),
+    project_id: uuid.UUID | None = Form(default=None),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     allowed_extensions = {".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv"}
     if not file.filename or "." not in file.filename:
@@ -47,7 +51,10 @@ async def create_job(
     )
 
     service = JobService(db)
-    job = await service.create_job(file_bytes, file.filename, config)
+    job = await service.create_job(
+        file_bytes, file.filename, config,
+        owner_id=current_user.id, project_id=project_id,
+    )
 
     return job
 
@@ -57,9 +64,10 @@ async def list_jobs(
     page: int = Query(default=1, ge=1),
     per_page: int = Query(default=20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     service = JobService(db)
-    jobs, total = await service.list_jobs(page, per_page)
+    jobs, total = await service.list_jobs(page, per_page, owner_id=current_user.id)
 
     return JobListResponse(jobs=jobs, total=total, page=page, per_page=per_page)
 
@@ -68,9 +76,10 @@ async def list_jobs(
 async def get_job_status(
     job_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     service = JobService(db)
-    job = await service.get_job(job_id)
+    job = await service.get_job(job_id, owner_id=current_user.id)
 
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -82,9 +91,10 @@ async def get_job_status(
 async def cancel_job(
     job_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     service = JobService(db)
-    success = await service.cancel_job(job_id)
+    success = await service.cancel_job(job_id, owner_id=current_user.id)
 
     if not success:
         raise HTTPException(
@@ -92,7 +102,7 @@ async def cancel_job(
             detail="Job cannot be cancelled (not found or already completed/failed)",
         )
 
-    job = await service.get_job(job_id)
+    job = await service.get_job(job_id, owner_id=current_user.id)
     return job
 
 
@@ -100,9 +110,10 @@ async def cancel_job(
 async def delete_job(
     job_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     service = JobService(db)
-    success = await service.delete_job(job_id)
+    success = await service.delete_job(job_id, owner_id=current_user.id)
 
     if not success:
         raise HTTPException(
@@ -116,9 +127,10 @@ async def download_original_clip(
     job_id: uuid.UUID,
     clip_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     service = JobService(db)
-    file_path = await service.get_clip_file_path(job_id, clip_id, "original")
+    file_path = await service.get_clip_file_path(job_id, clip_id, "original", owner_id=current_user.id)
 
     if not file_path:
         raise HTTPException(status_code=404, detail="Clip file not found")
@@ -135,9 +147,10 @@ async def download_final_clip(
     job_id: uuid.UUID,
     clip_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     service = JobService(db)
-    file_path = await service.get_clip_file_path(job_id, clip_id, "final")
+    file_path = await service.get_clip_file_path(job_id, clip_id, "final", owner_id=current_user.id)
 
     if not file_path:
         raise HTTPException(status_code=404, detail="Clip file not found")

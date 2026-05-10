@@ -5,6 +5,35 @@ from app.schemas.job import (
     ClipResponse,
     JobListResponse,
 )
+from app.schemas.auth import (
+    UserCreate,
+    UserLogin,
+    UserResponse,
+    UserUpdate,
+    PasswordChange,
+    TokenPair,
+    RefreshRequest,
+    TokenResponse,
+    SessionResponse,
+    MessageResponse,
+)
+from app.schemas.project import (
+    ProjectCreate,
+    ProjectUpdate,
+    ProjectResponse,
+    ProjectListResponse,
+)
+from app.schemas.search import (
+    SearchRequest,
+    SearchResponse,
+    SimilarRequest,
+    SegmentResult,
+    TopicClusterResponse,
+    ClusterListResponse,
+    EmbeddingStatsResponse,
+    EmbedJobRequest,
+    EmbedJobResponse,
+)
 
 __all__ = [
     "JobCreate",
@@ -12,4 +41,27 @@ __all__ = [
     "JobStatusResponse",
     "ClipResponse",
     "JobListResponse",
+    "UserCreate",
+    "UserLogin",
+    "UserResponse",
+    "UserUpdate",
+    "PasswordChange",
+    "TokenPair",
+    "RefreshRequest",
+    "TokenResponse",
+    "SessionResponse",
+    "MessageResponse",
+    "ProjectCreate",
+    "ProjectUpdate",
+    "ProjectResponse",
+    "ProjectListResponse",
+    "SearchRequest",
+    "SearchResponse",
+    "SimilarRequest",
+    "SegmentResult",
+    "TopicClusterResponse",
+    "ClusterListResponse",
+    "EmbeddingStatsResponse",
+    "EmbedJobRequest",
+    "EmbedJobResponse",
 ]
