@@ -1,5 +1,14 @@
 import { create } from 'zustand';
-import type { Job, UploadConfig } from '@/types';
+import type {
+  Job,
+  UploadConfig,
+  ConnectedAccount,
+  PublishDraft,
+  PublishHistoryEntry,
+  ExportPreset,
+  PublishSchedule,
+  AnalyticsSummary,
+} from '@/types';
 
 interface AppState {
   jobs: Job[];
@@ -18,6 +27,33 @@ interface AppState {
   
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+
+  // Publishing state
+  connectedAccounts: ConnectedAccount[];
+  setConnectedAccounts: (accounts: ConnectedAccount[]) => void;
+  addConnectedAccount: (account: ConnectedAccount) => void;
+  removeConnectedAccount: (accountId: string) => void;
+
+  drafts: PublishDraft[];
+  setDrafts: (drafts: PublishDraft[]) => void;
+  addDraft: (draft: PublishDraft) => void;
+  updateDraft: (draft: PublishDraft) => void;
+  removeDraft: (draftId: string) => void;
+
+  publishHistory: PublishHistoryEntry[];
+  setPublishHistory: (history: PublishHistoryEntry[]) => void;
+  addHistoryEntry: (entry: PublishHistoryEntry) => void;
+  updateHistoryEntry: (entry: PublishHistoryEntry) => void;
+
+  schedules: PublishSchedule[];
+  setSchedules: (schedules: PublishSchedule[]) => void;
+  removeSchedule: (scheduleId: string) => void;
+
+  exportPresets: ExportPreset[];
+  setExportPresets: (presets: ExportPreset[]) => void;
+
+  analyticsSummary: AnalyticsSummary | null;
+  setAnalyticsSummary: (summary: AnalyticsSummary | null) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -67,4 +103,59 @@ export const useAppStore = create<AppState>((set) => ({
   
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error }),
+
+  // Publishing
+  connectedAccounts: [],
+  setConnectedAccounts: (accounts) => set({ connectedAccounts: accounts }),
+  addConnectedAccount: (account) =>
+    set((state) => ({
+      connectedAccounts: [account, ...state.connectedAccounts],
+    })),
+  removeConnectedAccount: (accountId) =>
+    set((state) => ({
+      connectedAccounts: state.connectedAccounts.filter((a) => a.id !== accountId),
+    })),
+
+  drafts: [],
+  setDrafts: (drafts) => set({ drafts }),
+  addDraft: (draft) =>
+    set((state) => ({
+      drafts: [draft, ...state.drafts],
+    })),
+  updateDraft: (updatedDraft) =>
+    set((state) => ({
+      drafts: state.drafts.map((d) =>
+        d.id === updatedDraft.id ? updatedDraft : d
+      ),
+    })),
+  removeDraft: (draftId) =>
+    set((state) => ({
+      drafts: state.drafts.filter((d) => d.id !== draftId),
+    })),
+
+  publishHistory: [],
+  setPublishHistory: (history) => set({ publishHistory: history }),
+  addHistoryEntry: (entry) =>
+    set((state) => ({
+      publishHistory: [entry, ...state.publishHistory],
+    })),
+  updateHistoryEntry: (updatedEntry) =>
+    set((state) => ({
+      publishHistory: state.publishHistory.map((e) =>
+        e.id === updatedEntry.id ? updatedEntry : e
+      ),
+    })),
+
+  schedules: [],
+  setSchedules: (schedules) => set({ schedules }),
+  removeSchedule: (scheduleId) =>
+    set((state) => ({
+      schedules: state.schedules.filter((s) => s.id !== scheduleId),
+    })),
+
+  exportPresets: [],
+  setExportPresets: (presets) => set({ exportPresets: presets }),
+
+  analyticsSummary: null,
+  setAnalyticsSummary: (summary) => set({ analyticsSummary: summary }),
 }));

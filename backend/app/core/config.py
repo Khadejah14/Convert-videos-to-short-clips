@@ -40,6 +40,18 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    # TikTok OAuth
+    TIKTOK_CLIENT_KEY: str = ""
+    TIKTOK_CLIENT_SECRET: str = ""
+
+    # YouTube OAuth
+    YOUTUBE_CLIENT_ID: str = ""
+    YOUTUBE_CLIENT_SECRET: str = ""
+
+    # Instagram OAuth (Facebook Graph API)
+    INSTAGRAM_CLIENT_ID: str = ""
+    INSTAGRAM_CLIENT_SECRET: str = ""
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

@@ -8,6 +8,7 @@ import { useAppStore } from '@/lib/store';
 import { Sidebar } from '@/components/layout/sidebar';
 import { VideoPlayer } from '@/components/player/video-player';
 import { ProcessingProgress } from '@/components/ui/processing-progress';
+import { PublishDialog } from '@/components/publishing/publish-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +33,7 @@ import {
   Eye,
   Trophy,
   Star,
+  Send,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -43,6 +45,7 @@ export default function JobDetailsPage() {
   const { currentJob, setCurrentJob, updateJob, removeJob, isLoading, setLoading } =
     useAppStore();
   const [selectedClip, setSelectedClip] = useState<Clip | null>(null);
+  const [showPublishDialog, setShowPublishDialog] = useState(false);
 
   // Enable polling for active jobs
   const isActive = currentJob
@@ -354,6 +357,16 @@ export default function JobDetailsPage() {
                             Download Original
                           </Button>
                         )}
+                        {selectedClip.status === 'completed' && selectedClip.final_url && (
+                          <Button
+                            variant="gradient"
+                            size="sm"
+                            onClick={() => setShowPublishDialog(true)}
+                          >
+                            <Send className="h-4 w-4 mr-2" />
+                            Publish
+                          </Button>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -492,6 +505,16 @@ export default function JobDetailsPage() {
                 </p>
               </CardContent>
             </Card>
+          )}
+
+          {/* Publish Dialog */}
+          {selectedClip && (
+            <PublishDialog
+              clip={selectedClip}
+              jobId={jobId}
+              open={showPublishDialog}
+              onClose={() => setShowPublishDialog(false)}
+            />
           )}
         </div>
       </main>

@@ -12,12 +12,14 @@ import {
   Sparkles,
   Menu,
   X,
+  Send,
 } from 'lucide-react';
 import { useState } from 'react';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Upload', href: '/dashboard', icon: Upload },
+  { name: 'Publish', href: '/dashboard/publish', icon: Send },
   { name: 'History', href: '/dashboard/history', icon: History },
 ];
 
